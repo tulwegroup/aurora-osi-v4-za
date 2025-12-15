@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapView } from "@/components/dashboard/MapView";
+import { EnhancedMapView } from "@/components/dashboard/EnhancedMapView";
 import { PredictionView } from "@/components/dashboard/PredictionView";
 import { ConsensusView } from "@/components/dashboard/ConsensusView";
 import { 
@@ -451,7 +452,7 @@ export default function AuroraOSI() {
               </TabsList>
               
               <TabsContent value="map" className="mt-4">
-                <MapView
+                <EnhancedMapView
                   campaign={activeCampaign}
                   anomalies={anomalies}
                   onAnomalySelect={handleAnomalySelect}
