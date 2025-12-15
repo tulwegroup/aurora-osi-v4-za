@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getGEEService } from '@/lib/google-earth-engine';
+import { MultiAgentConsensus } from '@/lib/consensus/multi-agent-consensus';
 
 // POST /api/campaigns/process-live-data - Process real satellite data for campaign
 export async function POST(request: NextRequest) {
@@ -32,15 +32,20 @@ export async function POST(request: NextRequest) {
 
     console.log(`Processing live satellite data for campaign: ${campaign.name}`);
 
-    // Get Google Earth Engine service
-    const geeService = getGEEService();
+    // Get Google Earth Engine service via consensus engine
+    const consensusEngine = new MultiAgentConsensus();
+    await consensusEngine.initialize();
 
     // Gather real satellite data
-    const satelliteData = await geeService.gatherSatelliteData(
+    const satelliteData = await consensusEngine.gatherSatelliteData(
       campaign.latitude,
       campaign.longitude,
       campaign.radiusKm,
-      campaign.resourceType
+      campaign.resourceType,
+      {
+        start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+      }
     );
 
     console.log(`Satellite data gathered from: ${satelliteData.metadata?.source || 'unknown'}`);
