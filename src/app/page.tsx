@@ -27,6 +27,7 @@ import {
   Pause,
   RotateCcw
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Campaign {
   id: string;
@@ -84,6 +85,7 @@ export default function AuroraOSI() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [isGeneratingAnomalies, setIsGeneratingAnomalies] = useState(false);
   const [isGeneratingPredictions, setIsGeneratingPredictions] = useState(false);
+  const router = useRouter();
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     description: '',
@@ -258,7 +260,11 @@ export default function AuroraOSI() {
                 <Activity className="h-3 w-3" />
                 <span>System Active</span>
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => router.push('/settings')}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>

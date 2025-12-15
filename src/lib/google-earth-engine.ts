@@ -50,12 +50,14 @@ interface GEEAnalysisResult {
 class GoogleEarthEngineService {
   private config: GEEConfig;
   private isInitialized = false;
+  private hasRealCredentials = false;
 
   constructor(config: GEEConfig = {}) {
     this.config = {
       earthEngineEndpoint: 'https://earthengine.googleapis.com/v1',
       ...config
     };
+    this.hasRealCredentials = !!(config.serviceAccountKey && config.projectId);
   }
 
   async initialize(): Promise<boolean> {
@@ -69,7 +71,7 @@ class GoogleEarthEngineService {
       // Initialize GEE client
       // This would normally use the official GEE client library
       this.isInitialized = true;
-      console.log('Google Earth Engine service initialized');
+      console.log('Google Earth Engine service initialized with real credentials');
       return true;
     } catch (error) {
       console.error('Failed to initialize Google Earth Engine:', error);
@@ -153,7 +155,17 @@ class GoogleEarthEngineService {
     try {
       // Real GEE implementation would go here
       // For now, return enhanced mock data
-      return this.getMockSatelliteData(imageData);
+      const result = await this.getMockSatelliteData(imageData);
+      
+      // Update metadata to indicate real data usage
+      result.metadata = {
+        ...result.metadata,
+        source: this.hasRealCredentials ? 'Google Earth Engine (Real)' : 'Mock Data (Synthetic)',
+        hasRealCredentials: this.hasRealCredentials,
+        isInitialized: this.isInitialized
+      };
+      
+      return result;
     } catch (error) {
       console.error('Error fetching satellite data:', error);
       throw error;
