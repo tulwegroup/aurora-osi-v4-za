@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Aurora OSI v4.0 - Predictive Subsurface Intelligence Platform
+// Database Schema for Geospatial Resource Exploration
 
 generator client {
   provider = "prisma-client-js"
@@ -17,16 +14,124 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  role      String   @default("explorer") // explorer, analyst, admin
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Relations
+  campaigns Campaign[]
+  reports   Report[]
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Campaign {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  latitude        Float
+  longitude       Float
+  radiusKm        Float
+  resourceType    String   // oil, gas, minerals, water, geothermal
+  geologyContext  String?  // basin, craton, orogen, etc.
+  status          String   @default("active") // active, completed, archived
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  creator    User       @relation(fields: [createdBy], references: [id])
+  anomalies  Anomaly[]
+  predictions Prediction[]
+  reports    Report[]
+  
+  @@map("campaigns")
+}
+
+model Anomaly {
+  id              String   @id @default(cuid())
+  campaignId      String
+  latitude        Float
+  longitude       Float
+  depthM          Float?
+  probability     Float    // 0-1 confidence score
+  confidence      Float    // statistical confidence
+  anomalyType     String   // gravity, magnetic, thermal, spectral
+  value           Float?   // measured value
+  volumeM3        Float?   // estimated volume
+  resourceEstimate Json?    // resource estimates
+  physicsValidation Json?   // physics validation results
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  
+  @@map("anomalies")
+}
+
+model Prediction {
+  id              String   @id @default(cuid())
+  campaignId      String
+  targetYear      Int      // prediction year
+  resourceType    String
+  volumeM3        Float?
+  tonnage         Float?
+  confidence      Float    // prediction confidence
+  uncertainty     Float?   // uncertainty range
+  scenario        String   @default("base") // base, optimistic, pessimistic
+  modelVersion    String   // AI model version
+  createdAt       DateTime @default(now())
+  
+  // Relations
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  
+  @@map("predictions")
+}
+
+model Report {
+  id              String   @id @default(cuid())
+  campaignId      String
+  title           String
+  summary         String?
+  methodology     String?
+  findings        Json?    // structured findings
+  recommendations String?
+  authenticityScore Float? // agent validation score
+  harmonizationScore Float? // data harmonization score
+  status          String   @default("draft") // draft, review, approved
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  creator  User    @relation(fields: [createdBy], references: [id])
+  
+  @@map("reports")
+}
+
+model SensorData {
+  id              String   @id @default(cuid())
+  campaignId      String?
+  sensorType      String   // sentinel1, landsat9, goce, etc.
+  latitude        Float
+  longitude       Float
+  acquisitionDate DateTime
+  data            Json     // sensor-specific data
+  processed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  
+  @@map("sensor_data")
+}
+
+model DigitalTwin {
+  id              String   @id @default(cuid())
+  campaignId      String   @unique
+  voxelResolution Float    @default(10.0) // meters per voxel
+  bounds          Json     // bounding box coordinates
+  currentGrid     Json?    // current voxel state
+  predictions     Json?    // temporal predictions
+  lastUpdated     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  
+  @@map("digital_twins")
 }

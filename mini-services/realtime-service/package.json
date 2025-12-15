@@ -1,0 +1,22 @@
+{
+  "name": "aurora-osi-realtime-service",
+  "version": "1.0.0",
+  "description": "Real-time WebSocket service for Aurora OSI v4.0",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/cors": "^2.8.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}
